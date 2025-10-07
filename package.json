@@ -1,0 +1,17 @@
+{
+  "name": "utilitaire-fichiers",
+  "version": "1.0.0",
+  "description": "Utilitaire GUI pour copier et renommer des fichiers",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Utilisateur",
+  "license": "MIT",
+  "dependencies": {
+    "dockerode": "^4.0.2",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "conf": "^13.0.0"
+  }
+}

@@ -1,0 +1,20 @@
+# Fichiers et dossiers à ignorer lors du build de l'image Docker
+
+# Dépendances locales
+node_modules
+
+# Fichiers de log
+npm-debug.log
+*.log
+
+# Fichiers de configuration Docker et de documentation
+Dockerfile
+docker-compose.yml
+README.md
+
+# Dossiers et fichiers de contrôle de version
+.git
+.gitignore
+
+# Fichiers de configuration de l'éditeur
+.vscode

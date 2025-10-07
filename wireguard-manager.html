@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title">WireGuard VPN Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .file-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--white);
+        }
+        
+        .file-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .file-item:hover {
+            background: var(--light-bg);
+            transform: translateX(5px);
+        }
+        
+        .file-item.selected {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: var(--white);
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--success-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.2rem;
+        }
+        
+        .file-item.selected .file-icon {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .file-details h4 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .file-details p {
+            margin: 0;
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+        
+        .file-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-available {
+            background: var(--success-color);
+            color: var(--white);
+        }
+        
+        .status-current {
+            background: var(--warning-color);
+            color: var(--white);
+        }
+        
+        .refresh-btn {
+            margin-bottom: 15px;
+        }
+        
+        .no-files {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .current-config {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: var(--white);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .current-config i {
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-shield-alt"></i> <span data-i18n="title">WireGuard VPN Manager</span></h1>
+            <p data-i18n="subtitle">Select and activate your WireGuard configurations</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Configuration actuelle -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-check-circle"></i> <span data-i18n="currentConfig">Current Configuration</span></h2>
+                </div>
+                <div class="card-body">
+                    <div id="currentConfig" class="current-config">
+                        <i class="fas fa-cog fa-spin"></i>
+                        <div>
+                            <h4 data-i18n="checking">Checking...</h4>
+                            <p data-i18n="readingConfig">Reading active configuration</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des configurations disponibles -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> <span data-i18n="availableConfigs">Available Configurations</span></h2>
+                </div>
+                <div class="card-body">
+                    <button id="refreshBtn" class="btn btn-secondary refresh-btn">
+                        <i class="fas fa-sync-alt"></i> <span data-i18n="refreshList">Refresh List</span>
+                    </button>
+                    
+                    <div id="fileList" class="file-list">
+                        <div class="no-files">
+                            <i class="fas fa-spinner fa-spin"></i> <span data-i18n="loadingFiles">Loading files...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-play"></i> <span data-i18n="actions">Actions</span></h2>
+                </div>
+                <div class="card-body">
+                    <div class="action-buttons">
+                        <button id="activateBtn" class="btn btn-success" disabled>
+                            <i class="fas fa-power-off"></i> <span data-i18n="activateConfig">Activate Configuration</span>
+                        </button>
+                        <button id="resetBtn" class="btn btn-warning">
+                            <i class="fas fa-refresh"></i> <span data-i18n="deselect">Deselect</span>
+                        </button>
+                    </div>
+                    <div class="help-text mt-3">
+                        <span data-i18n="helpText">Select a configuration from the list then click "Activate" to change the VPN country</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historique des opérations -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-history"></i> <span data-i18n="activationHistory">Activation History</span></h2>
+                </div>
+                <div class="card-body">
+                    <div id="operationHistory" class="operation-list">
+                        <p class="no-operations" data-i18n="noOperation">No operations performed</p>
+                    </div>
+                    <button id="clearHistoryBtn" class="btn btn-danger mt-3">
+                        <i class="fas fa-trash"></i> <span data-i18n="clearHistory">Clear History</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Zone de notifications -->
+        <div id="notifications" class="notifications"></div>
+    </div>
+
+    <!-- Modal de confirmation -->
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="activationConfirm">Activation Confirmation</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" data-i18n="areYouSure">Are you sure you want to activate this configuration?</p>
+                <div class="help-text">
+                    <strong><span data-i18n="note">Note:</span></strong> <span data-i18n="noteHelp">The existing wg0.conf file will be modified automatically.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmYes" class="btn btn-success" data-i18n="yesActivate">Yes, activate</button>
+                <button id="confirmNo" class="btn btn-secondary" data-i18n="cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="wireguard-script.js"></script>
+</body>
+</html>
