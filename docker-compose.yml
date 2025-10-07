@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: wireguard-manager
+    container_name: Gluetun-switcher
     restart: unless-stopped
     ports:
       # Accédez à l'application via http://localhost:3003
@@ -17,7 +17,7 @@ services:
       - CONTAINER_TO_RESTART=gluetun,qbittorrent
     volumes:
       # Persistance des données de l'application (historique, etc.)
-      - /volume1/docker/wireguard-manager/config:/root/.config
+      - /volume1/docker/gluetun-switcher/config:/root/.config
       
       # --- VOLUME A ADAPTER PAR L'UTILISATEUR ---
       # Montez ici le dossier contenant vos configurations WireGuard de l'hôte.
