@@ -1,7 +1,7 @@
 {
-  "name": "utilitaire-fichiers",
+  "name": "gluetun-switcher",
   "version": "1.0.0",
-  "description": "Utilitaire GUI pour copier et renommer des fichiers",
+  "description": "GUI for switch wireguard conf",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
