@@ -1,5 +1,5 @@
 {
-  "title": "Gluetun WireGuard configuration switcher",
+  "title": "Gluetun Switcher",
   "subtitle": "Select and activate your WireGuard configurations",
   "currentConfig": "Current Configuration",
   "checking": "Checking...",
