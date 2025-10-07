@@ -11,7 +11,7 @@ const port = 3003;
 async function startServer() {
   // Importation dynamique pour les modules ESM
   const { default: Conf } = await import('conf');
-  const store = new Conf({ projectName: 'wireguard-manager' });
+  const store = new Conf({ projectName: 'gluetun-switcher' });
   const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
 // Middlewares
