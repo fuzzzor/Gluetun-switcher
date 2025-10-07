@@ -30,7 +30,7 @@ For instance, if you use the `gluetun` container, you likely already have a fold
 
 ## Deployment
 
-You can deploy WireGuard Manager using Docker Compose (recommended) or a simple `docker run` command.
+You can deploy Gluetun-switcher using Docker Compose (recommended) or a simple `docker run` command.
 
 ### 1. Docker Compose (Recommended)
 
