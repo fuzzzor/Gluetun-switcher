@@ -431,22 +431,24 @@ function getLocationInfo(fileName) {
 
     const allKeywords = [];
     for (const [countryCode, data] of Object.entries(locationData)) {
+        // Le nom de la ville à afficher est le dernier élément de la liste de mots-clés.
+        const displayCity = data.keywords[data.keywords.length - 1];
         for (const keyword of data.keywords) {
-            allKeywords.push({ keyword, countryCode });
+            allKeywords.push({ keyword, countryCode, displayCity });
         }
     }
 
     allKeywords.sort((a, b) => b.keyword.length - a.keyword.length);
 
-    for (const { keyword, countryCode } of allKeywords) {
+    for (const { keyword, countryCode, displayCity } of allKeywords) {
         const regex = new RegExp(`\\b${keyword}\\b`);
         if (regex.test(name)) {
             const data = locationData[countryCode];
             const countryName = translations[data.countryNameKey] || data.countryNameKey;
             return {
-                flag: `<img src="flags/${countryCode}.svg" class="country-flag" alt="${countryName}" title="${countryName}">`,
+                flag: `<img src="config/flags/${countryCode}.svg" class="country-flag" alt="${countryName}" title="${countryName}">`,
                 name: countryName,
-                city: keyword.charAt(0).toUpperCase() + keyword.slice(1)
+                city: displayCity.charAt(0).toUpperCase() + displayCity.slice(1)
             };
         }
     }

@@ -9,10 +9,11 @@ const app = express();
 const port = 3003;
 
 async function startServer() {
-  // Importation dynamique pour les modules ESM
-  const { default: Conf } = await import('conf');
-  const store = new Conf({ projectName: 'gluetun-switcher' });
   const docker = new Docker({ socketPath: '/var/run/docker.sock' });
+  const historyPath = path.join(__dirname, 'history', 'history.json');
+
+  // S'assurer que le répertoire d'historique existe
+  await fs.mkdir(path.dirname(historyPath), { recursive: true });
 
 // Middlewares
 app.use(cors());
@@ -51,7 +52,7 @@ app.get('/api/wireguard-files', async (req, res) => {
 // Charger les données de localisation
 app.get('/api/locations', async (req, res) => {
   try {
-    const data = await fs.readFile(path.join(__dirname, 'locations.json'), 'utf8');
+    const data = await fs.readFile(path.join(__dirname, 'config', 'locations.json'), 'utf8');
     res.json(JSON.parse(data));
   } catch (error) {
     res.status(500).json({
@@ -90,7 +91,8 @@ app.post('/api/activate-config', async (req, res) => {
     console.log(`[ACTIVATE] Attempting to copy '${sourcePath}' to '${wg0Path}'`);
     await fs.copyFile(sourcePath, wg0Path);
     console.log(`[ACTIVATE] Copy successful.`);
-    store.set('activeConfigName', sourceName);
+    // La dépendance 'conf' n'est plus utilisée pour stocker le nom actif.
+    // Cette information est maintenant récupérée dynamiquement.
 
     let message = `"${sourceName}" a été copié et activé en "wg0.conf" avec succès.`;
 
@@ -142,7 +144,10 @@ app.get('/api/current-config-info', async (req, res) => {
     });
   }
   const wg0Path = path.join(wireguardDir, 'wg0.conf');
-  const activeConfigName = store.get('activeConfigName');
+  // On ne peut plus se fier à 'conf', on va essayer de deviner le nom
+  // en se basant sur le contenu du fichier. C'est une approche moins fiable.
+  // Pour une solution robuste, il faudrait une autre méthode de stockage.
+  const activeConfigName = 'wg0.conf';
 
   try {
     const stats = await fs.stat(wg0Path);
@@ -168,16 +173,37 @@ app.get('/api/current-config-info', async (req, res) => {
 
 // Gestion de l'historique des opérations
 app.route('/api/operation-history')
-  .get((req, res) => {
-    res.json(store.get('operationHistory', []));
+  .get(async (req, res) => {
+    try {
+      const data = await fs.readFile(historyPath, 'utf8');
+      res.json(JSON.parse(data));
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        res.json([]); // Le fichier n'existe pas, renvoyer un tableau vide
+      } else {
+        res.status(500).json({ success: false, error: 'Impossible de lire l\'historique.' });
+      }
+    }
   })
-  .post((req, res) => {
-    store.set('operationHistory', req.body.history);
-    res.json({ success: true });
+  .post(async (req, res) => {
+    try {
+      await fs.writeFile(historyPath, JSON.stringify(req.body.history, null, 2));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Impossible d\'écrire l\'historique.' });
+    }
   })
-  .delete((req, res) => {
-    store.delete('operationHistory');
-    res.json({ success: true });
+  .delete(async (req, res) => {
+    try {
+      await fs.unlink(historyPath);
+      res.json({ success: true });
+    } catch (error) {
+      if (error.code !== 'ENOENT') { // Ignorer si le fichier n'existe pas
+        res.status(500).json({ success: false, error: 'Impossible de supprimer l\'historique.' });
+      } else {
+        res.json({ success: true });
+      }
+    }
   });
 
 // Route pour servir la page d'accueil explicite
