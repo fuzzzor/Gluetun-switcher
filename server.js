@@ -11,6 +11,7 @@ const port = 3003;
 async function startServer() {
   const docker = new Docker({ socketPath: '/var/run/docker.sock' });
   const historyPath = path.join(__dirname, 'config', 'history', 'history.json');
+  const statePath = path.join(__dirname, 'config', 'state.json');
 
 // Middlewares
 app.use(cors());
@@ -88,8 +89,8 @@ app.post('/api/activate-config', async (req, res) => {
     console.log(`[ACTIVATE] Attempting to copy '${sourcePath}' to '${wg0Path}'`);
     await fs.copyFile(sourcePath, wg0Path);
     console.log(`[ACTIVATE] Copy successful.`);
-    // La dépendance 'conf' n'est plus utilisée pour stocker le nom actif.
-    // Cette information est maintenant récupérée dynamiquement.
+    // Sauvegarder le nom du fichier activé
+    await fs.writeFile(statePath, JSON.stringify({ activeConfigName: sourceName }));
 
     let message = `"${sourceName}" a été copié et activé en "wg0.conf" avec succès.`;
 
@@ -141,10 +142,14 @@ app.get('/api/current-config-info', async (req, res) => {
     });
   }
   const wg0Path = path.join(wireguardDir, 'wg0.conf');
-  // On ne peut plus se fier à 'conf', on va essayer de deviner le nom
-  // en se basant sur le contenu du fichier. C'est une approche moins fiable.
-  // Pour une solution robuste, il faudrait une autre méthode de stockage.
-  const activeConfigName = 'wg0.conf';
+  let activeConfigName = 'wg0.conf';
+  try {
+    const stateData = await fs.readFile(statePath, 'utf8');
+    activeConfigName = JSON.parse(stateData).activeConfigName || 'wg0.conf';
+  } catch (error) {
+    // Le fichier d'état n'existe pas encore, ce n'est pas une erreur bloquante.
+    console.log("Fichier d'état non trouvé, utilisation du nom par défaut.");
+  }
 
   try {
     const stats = await fs.stat(wg0Path);
