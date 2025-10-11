@@ -205,7 +205,7 @@ app.route('/api/operation-history')
 
 // Route pour servir la page d'accueil explicite
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'wireguard-manager.html'));
+  res.sendFile(path.join(__dirname, 'gluetun-switcher.html'));
 });
 
 // Le middleware express.static sert les autres fichiers (CSS, JS, images).

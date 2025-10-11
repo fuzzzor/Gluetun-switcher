@@ -2,7 +2,7 @@
 
 Gluetun switcher is a lightweight web interface designed to simplify the management of WireGuard switch configurations on Gluetun, especially in a Docker environment. It allows you to quickly switch configurations and automatically restart dependent containers (like Gluetun, qBittorrent, etc.) to apply the new network settings.
 
-![Screenshot](https://raw.githubusercontent.com/fuzzzor/wireguard-manager/main/screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/fuzzzor/gluetun-switcher/main/screenshot.png)
 
 ## Features
 
@@ -50,7 +50,7 @@ services:
       - TZ=Europe/Paris
     volumes:
       # For application history persistence
-      - ./wireguard-manager/config:/root/.config
+      - ./gluetun-switcher/config:/root/.config
       
       # --- IMPORTANT VOLUME ---
       # Mount the folder containing your .conf files here
@@ -78,10 +78,10 @@ docker run -d \
   -e WIREGUARD_DIR=/etc/wireguard \
   -e CONTAINER_TO_RESTART="gluetun,qBittorrent" \
   -e TZ=Europe/Paris \
-  -v ./wireguard-manager/config:/root/.config \
+  -v ./gluetun-switcher/config:/root/.config \
   -v ./gluetun/wireguard:/etc/wireguard \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/fuzzzor/wireguard-manager:latest
+  ghcr.io/fuzzzor/gluetun-switcher:latest
 ```
 
 ---
