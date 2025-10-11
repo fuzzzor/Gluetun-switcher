@@ -48,6 +48,19 @@ app.get('/api/wireguard-files', async (req, res) => {
   }
 });
 
+// Charger les données de localisation
+app.get('/api/locations', async (req, res) => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, 'locations.json'), 'utf8');
+    res.json(JSON.parse(data));
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: `Impossible de charger le fichier locations.json: ${error.message}`
+    });
+  }
+});
+
 // Activer une configuration WireGuard (renommer en wg0.conf)
 app.post('/api/activate-config', async (req, res) => {
   const { sourcePath } = req.body;

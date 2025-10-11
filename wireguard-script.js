@@ -37,6 +37,7 @@ const api = {
     listWireguardFiles: () => api.get('wireguard-files'),
     getCurrentConfigInfo: () => api.get('current-config-info'),
     activateConfig: (sourcePath) => api.post('activate-config', { sourcePath }),
+    getLocations: () => api.get('locations'),
 };
 
 
@@ -45,6 +46,7 @@ let selectedFile = null;
 let wireguardFiles = [];
 let operationHistory = [];
 let translations = {};
+let locationData = {};
 
 // Elements DOM
 const refreshBtn = document.getElementById('refreshBtn');
@@ -87,13 +89,25 @@ function applyTranslations() {
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadTranslations();
+    await Promise.all([
+        loadTranslations(),
+        loadLocations()
+    ]);
     initializeEventListeners();
     operationHistory = await api.getOperationHistory(); // Charger l'historique
     updateHistoryDisplay(); // Afficher l'historique chargé
     loadWireguardFiles();
     checkCurrentConfig();
 });
+
+async function loadLocations() {
+    try {
+        locationData = await api.getLocations();
+    } catch (error) {
+        console.error('Could not load locations:', error);
+        showNotification('Erreur: Impossible de charger les données de localisation.', 'error');
+    }
+}
  
 // Gestionnaires d'événements
 function initializeEventListeners() {
@@ -179,22 +193,25 @@ function displayFileList() {
         return;
     }
     
-    fileList.innerHTML = wireguardFiles.map(file => `
+    fileList.innerHTML = wireguardFiles.map(file => {
+        const location = getLocationInfo(file.name);
+        const locationString = location.city ? `${location.name}, ${location.city}` : location.name;
+        return `
         <div class="file-item" data-file="${file.name}" onclick="selectFile('${file.name}')">
             <div class="file-info">
                 <div class="file-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
                 <div class="file-details">
-                    <h4>${getCountryFlag(file.name)} ${file.name}</h4>
-                    <p>${getCountryName(file.name)}</p>
+                    <h4>${location.flag} ${file.name}</h4>
+                    <p>${locationString}</p>
                 </div>
             </div>
             <div class="file-status">
                 <span class="status-badge status-available">${translations.available}</span>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // Sélection d'un fichier
@@ -218,11 +235,13 @@ async function checkCurrentConfig() {
         const configInfo = await api.getCurrentConfigInfo();
 
         if (configInfo.success) {
+            const location = getLocationInfo(configInfo.name);
+            const locationString = location.city ? `${location.name}, ${location.city}` : location.name;
             currentConfig.innerHTML = `
                 <i class="fas fa-check-circle"></i>
                 <div>
-                    <h4>${getCountryFlag(configInfo.name)} ${configInfo.name} (${translations.active})</h4>
-                    <p>${getCountryName(configInfo.name)} - ${translations.size.replace('{size}', formatFileSize(configInfo.size))}</p>
+                    <h4>${location.flag} ${configInfo.name} (${translations.active})</h4>
+                    <p>${locationString} - ${translations.size.replace('{size}', formatFileSize(configInfo.size))}</p>
                 </div>
             `;
             currentConfig.style.background = '';
@@ -268,9 +287,11 @@ function resetSelection() {
 function showConfirmationModal() {
     if (!selectedFile) return;
     
+    const location = getLocationInfo(selectedFile.name);
+    const locationString = location.city ? `${location.name}, ${location.city}` : location.name;
     confirmMessage.innerHTML = `
         <strong>${translations.activateConfigTitle}</strong><br><br>
-        <strong>${translations.fileSelected}</strong> ${getCountryFlag(selectedFile.name)} ${selectedFile.name} (${getCountryName(selectedFile.name)})<br>
+        <strong>${translations.fileSelected}</strong> ${location.flag} ${selectedFile.name} (${locationString})<br>
         <strong>${translations.action}</strong> ${translations.activateThisConfig}<br><br>
         ${translations.thisActionWillActivate}
     `;
@@ -395,72 +416,46 @@ function formatTimestamp(date) {
         hour: '2-digit', minute: '2-digit', second: '2-digit'
     }).format(date);
 }
-// https://www.drapeauxdespays.fr/
-function getCountryFlag(fileName) {
-    if (!fileName) return `<i class="fas fa-globe country-flag" title="${translations.unknown}"></i>`;
-    const name = fileName.toLowerCase();
-    const locationFlags = {
-        'zrh': 'ch', 'cdg': 'fr', 'lhr': 'gb', 'ist': 'tr', 'fra': 'de',
-        'dub': 'ie', 'ord': 'us', 'bud': 'hu', 'bru': 'be', 'ams': 'nl',
-        'zurich': 'ch', 'paris': 'fr', 'london': 'gb', 'istanbul': 'tr',
-        'frankfurt': 'de', 'dublin': 'ie', 'chicago': 'us', 'budapest': 'hu',
-        'brussels': 'be', 'amsterdam': 'nl', 'moscow': 'ru', 'svo': 'ru', 'toronto': 'ca',
-        'vancouver': 'ca', 'vienna': 'at', 'warsaw': 'pl', 'taipei': 'tw',
-        'tallinn': 'ee', 'tirana': 'al', 'tokyo': 'jp', 'sofia': 'bg',
-        'stlouis': 'us', 'stockholm': 'se', 'sydney': 'au', 'saopaulo': 'br',
-        'seattle': 'us', 'seoul': 'kr', 'singapore': 'sg', 'portland': 'us',
-        'prague': 'cz', 'reykjavik': 'is', 'riga': 'lv', 'mumbai': 'in',
-        'newyork': 'us', 'oslo': 'no', 'mexicocity': 'mx', 'miami': 'us',
-        'milan': 'it', 'montreal': 'ca', 'losangeles': 'us', 'madrid': 'es',
-        'manchester': 'gb', 'manila': 'ph', 'kyiv': 'ua', 'lisbon': 'pt',
-        'ljubljana': 'si', 'jerusalem': 'il', 'johannesburg': 'za',
-        'kualalumpur': 'my', 'helsinki': 'fi', 'hongkong': 'hk', 'jakarta': 'id',
-        'buenosaires': 'ar', 'copenhagen': 'dk', 'berlin': 'de', 'bratislava': 'sk',
-        'bucharest': 'ro', 'atlanta': 'us', 'auckland': 'nz', 'bangkok': 'th',
-        'belgrade': 'rs', 'athens': 'gr'
+function getLocationInfo(fileName) {
+    const defaultLocation = {
+        flag: `<i class="fas fa-globe country-flag" title="${translations.unknown || 'Unknown'}"></i>`,
+        name: translations.wireguardConfig || 'WireGuard Config',
+        city: null
     };
-    for (const [key, countryCode] of Object.entries(locationFlags)) {
-        if (name.includes(key)) {
-            return `<img src="flags/${countryCode}.svg" class="country-flag" alt="${key}" title="${key}">`;
+
+    if (!fileName) {
+        return defaultLocation;
+    }
+
+    const name = fileName.toLowerCase();
+
+    const allKeywords = [];
+    for (const [countryCode, data] of Object.entries(locationData)) {
+        for (const keyword of data.keywords) {
+            allKeywords.push({ keyword, countryCode });
         }
     }
-    if (name.includes('server')) return `<i class="fas fa-server country-flag" title="${translations.server}"></i>`;
-    if (name.includes('test')) return `<i class="fas fa-flask country-flag" title="${translations.test}"></i>`;
-    if (name.includes('backup')) return `<i class="fas fa-save country-flag" title="${translations.backup}"></i>`;
-    return `<i class="fas fa-globe country-flag" title="${translations.unknown}"></i>`;
-}
 
-function getCountryName(fileName) {
-    if (!fileName) return translations.wireguardConfig;
-    const name = fileName.toLowerCase();
-    const locationCountries = {
-        'zrh': translations.switzerland, 'cdg': translations.france, 'lhr': translations.uk, 'ist': translations.turkey,
-        'fra': translations.germany, 'dub': translations.ireland, 'ord': translations.usa, 'bud': translations.hungary,
-        'bru': translations.belgium, 'ams': translations.netherlands, 'zurich': translations.switzerland, 'paris': translations.france,
-        'london': translations.uk, 'istanbul': translations.turkey, 'frankfurt': translations.germany,
-        'dublin': translations.ireland, 'chicago': translations.usa, 'budapest': translations.hungary,
-        'brussels': translations.belgium, 'amsterdam': translations.netherlands, 'moscow': translations.russia, 'svo': translations.russia,
-        'toronto': translations.canada, 'vancouver': translations.canada, 'vienna': translations.austria, 'warsaw': translations.poland,
-        'taipei': translations.taiwan, 'tallinn': translations.estonia, 'tirana': translations.albania, 'tokyo': translations.japan,
-        'sofia': translations.bulgaria, 'stlouis': translations.usa, 'stockholm': translations.sweden, 'sydney': translations.australia,
-        'saopaulo': translations.brazil, 'seattle': translations.usa, 'seoul': translations.southkorea, 'singapore': translations.singapore,
-        'portland': translations.usa, 'prague': translations.czechrepublic, 'reykjavik': translations.iceland, 'riga': translations.latvia,
-        'mumbai': translations.india, 'newyork': translations.usa, 'oslo': translations.norway, 'mexicocity': translations.mexico,
-        'miami': translations.usa, 'milan': translations.italy, 'montreal': translations.canada, 'losangeles': translations.usa,
-        'madrid': translations.spain, 'manchester': translations.uk, 'manila': translations.philippines, 'kyiv': translations.ukraine,
-        'lisbon': translations.portugal, 'ljubljana': translations.slovenia, 'jerusalem': translations.israel, 'johannesburg': translations.southafrica,
-        'kualalumpur': translations.malaysia, 'helsinki': translations.finland, 'hongkong': translations.hongkong, 'jakarta': translations.indonesia,
-        'buenosaires': translations.argentina, 'copenhagen': translations.denmark, 'berlin': translations.germany, 'bratislava': translations.slovakia,
-        'bucharest': translations.romania, 'atlanta': translations.usa, 'auckland': translations.newzealand, 'bangkok': translations.thailand,
-        'belgrade': translations.serbia, 'athens': translations.greece
-    };
-    for (const [key, countryName] of Object.entries(locationCountries)) {
-        if (name.includes(key)) return countryName;
+    allKeywords.sort((a, b) => b.keyword.length - a.keyword.length);
+
+    for (const { keyword, countryCode } of allKeywords) {
+        const regex = new RegExp(`\\b${keyword}\\b`);
+        if (regex.test(name)) {
+            const data = locationData[countryCode];
+            const countryName = translations[data.countryNameKey] || data.countryNameKey;
+            return {
+                flag: `<img src="flags/${countryCode}.svg" class="country-flag" alt="${countryName}" title="${countryName}">`,
+                name: countryName,
+                city: keyword.charAt(0).toUpperCase() + keyword.slice(1)
+            };
+        }
     }
-    if (name.includes('server')) return translations.genericServer;
-    if (name.includes('test')) return translations.testConfig;
-    if (name.includes('backup')) return translations.backupConfig;
-    return translations.wireguardConfig;
+
+    if (name.includes('server')) return { flag: `<i class="fas fa-server country-flag" title="${translations.server || 'Server'}"></i>`, name: translations.genericServer || 'Generic Server', city: null };
+    if (name.includes('test')) return { flag: `<i class="fas fa-flask country-flag" title="${translations.test || 'Test'}"></i>`, name: translations.testConfig || 'Test Config', city: null };
+    if (name.includes('backup')) return { flag: `<i class="fas fa-save country-flag" title="${translations.backup || 'Backup'}"></i>`, name: translations.backupConfig || 'Backup Config', city: null };
+
+    return defaultLocation;
 }
 
 async function clearOperationHistory() {
