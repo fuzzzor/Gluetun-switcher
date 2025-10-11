@@ -104,4 +104,4 @@ docker run -d \
     - **Why is this necessary?** The `docker.sock` file is a Unix socket that allows communication with the host's Docker daemon. By mounting this volume, you grant the WireGuard Manager container permission to send commands (like "restart") to the Docker daemon, thus allowing it to restart other containers on the same host. Without it, the automatic restart feature will not work.
 
 ---
-<br> 
+<br>
