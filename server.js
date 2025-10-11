@@ -10,10 +10,7 @@ const port = 3003;
 
 async function startServer() {
   const docker = new Docker({ socketPath: '/var/run/docker.sock' });
-  const historyPath = path.join(__dirname, 'history', 'history.json');
-
-  // S'assurer que le répertoire d'historique existe
-  await fs.mkdir(path.dirname(historyPath), { recursive: true });
+  const historyPath = path.join(__dirname, 'config', 'history', 'history.json');
 
 // Middlewares
 app.use(cors());

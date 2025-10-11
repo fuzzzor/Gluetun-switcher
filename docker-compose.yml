@@ -18,7 +18,7 @@ services:
       - CONTAINER_TO_RESTART=gluetun,qbittorrent
     volumes:
       # Persistance des données de l'application
-      - /volume1/docker/gluetun-switcher/history:/usr/src/app/history
+      - /volume1/docker/gluetun-switcher/config:/usr/src/app/config
       # --- VOLUME A ADAPTER PAR L'UTILISATEUR ---
       # Montez ici le dossier contenant vos configurations WireGuard de l'hôte.
       - /volume1/docker/gluetun/wireguard:/etc/wireguard
