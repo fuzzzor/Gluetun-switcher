@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: gluetun-switcher
     container_name: Gluetun-switcher
     restart: unless-stopped
     ports:

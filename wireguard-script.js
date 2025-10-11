@@ -395,7 +395,7 @@ function formatTimestamp(date) {
         hour: '2-digit', minute: '2-digit', second: '2-digit'
     }).format(date);
 }
-
+// https://www.drapeauxdespays.fr/
 function getCountryFlag(fileName) {
     if (!fileName) return `<i class="fas fa-globe country-flag" title="${translations.unknown}"></i>`;
     const name = fileName.toLowerCase();
@@ -404,7 +404,20 @@ function getCountryFlag(fileName) {
         'dub': 'ie', 'ord': 'us', 'bud': 'hu', 'bru': 'be', 'ams': 'nl',
         'zurich': 'ch', 'paris': 'fr', 'london': 'gb', 'istanbul': 'tr',
         'frankfurt': 'de', 'dublin': 'ie', 'chicago': 'us', 'budapest': 'hu',
-        'brussels': 'be', 'amsterdam': 'nl'
+        'brussels': 'be', 'amsterdam': 'nl', 'moscow': 'ru', 'svo': 'ru', 'toronto': 'ca',
+        'vancouver': 'ca', 'vienna': 'at', 'warsaw': 'pl', 'taipei': 'tw',
+        'tallinn': 'ee', 'tirana': 'al', 'tokyo': 'jp', 'sofia': 'bg',
+        'stlouis': 'us', 'stockholm': 'se', 'sydney': 'au', 'saopaulo': 'br',
+        'seattle': 'us', 'seoul': 'kr', 'singapore': 'sg', 'portland': 'us',
+        'prague': 'cz', 'reykjavik': 'is', 'riga': 'lv', 'mumbai': 'in',
+        'newyork': 'us', 'oslo': 'no', 'mexicocity': 'mx', 'miami': 'us',
+        'milan': 'it', 'montreal': 'ca', 'losangeles': 'us', 'madrid': 'es',
+        'manchester': 'gb', 'manila': 'ph', 'kyiv': 'ua', 'lisbon': 'pt',
+        'ljubljana': 'si', 'jerusalem': 'il', 'johannesburg': 'za',
+        'kualalumpur': 'my', 'helsinki': 'fi', 'hongkong': 'hk', 'jakarta': 'id',
+        'buenosaires': 'ar', 'copenhagen': 'dk', 'berlin': 'de', 'bratislava': 'sk',
+        'bucharest': 'ro', 'atlanta': 'us', 'auckland': 'nz', 'bangkok': 'th',
+        'belgrade': 'rs', 'athens': 'gr'
     };
     for (const [key, countryCode] of Object.entries(locationFlags)) {
         if (name.includes(key)) {
@@ -426,7 +439,20 @@ function getCountryName(fileName) {
         'bru': translations.belgium, 'ams': translations.netherlands, 'zurich': translations.switzerland, 'paris': translations.france,
         'london': translations.uk, 'istanbul': translations.turkey, 'frankfurt': translations.germany,
         'dublin': translations.ireland, 'chicago': translations.usa, 'budapest': translations.hungary,
-        'brussels': translations.belgium, 'amsterdam': translations.netherlands
+        'brussels': translations.belgium, 'amsterdam': translations.netherlands, 'moscow': translations.russia, 'svo': translations.russia,
+        'toronto': translations.canada, 'vancouver': translations.canada, 'vienna': translations.austria, 'warsaw': translations.poland,
+        'taipei': translations.taiwan, 'tallinn': translations.estonia, 'tirana': translations.albania, 'tokyo': translations.japan,
+        'sofia': translations.bulgaria, 'stlouis': translations.usa, 'stockholm': translations.sweden, 'sydney': translations.australia,
+        'saopaulo': translations.brazil, 'seattle': translations.usa, 'seoul': translations.southkorea, 'singapore': translations.singapore,
+        'portland': translations.usa, 'prague': translations.czechrepublic, 'reykjavik': translations.iceland, 'riga': translations.latvia,
+        'mumbai': translations.india, 'newyork': translations.usa, 'oslo': translations.norway, 'mexicocity': translations.mexico,
+        'miami': translations.usa, 'milan': translations.italy, 'montreal': translations.canada, 'losangeles': translations.usa,
+        'madrid': translations.spain, 'manchester': translations.uk, 'manila': translations.philippines, 'kyiv': translations.ukraine,
+        'lisbon': translations.portugal, 'ljubljana': translations.slovenia, 'jerusalem': translations.israel, 'johannesburg': translations.southafrica,
+        'kualalumpur': translations.malaysia, 'helsinki': translations.finland, 'hongkong': translations.hongkong, 'jakarta': translations.indonesia,
+        'buenosaires': translations.argentina, 'copenhagen': translations.denmark, 'berlin': translations.germany, 'bratislava': translations.slovakia,
+        'bucharest': translations.romania, 'atlanta': translations.usa, 'auckland': translations.newzealand, 'bangkok': translations.thailand,
+        'belgrade': translations.serbia, 'athens': translations.greece
     };
     for (const [key, countryName] of Object.entries(locationCountries)) {
         if (name.includes(key)) return countryName;
