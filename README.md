@@ -46,20 +46,22 @@ services:
       - "3003:3003"
     environment:
       - WIREGUARD_DIR=/etc/wireguard
+      - NODE_ENV=production
       - CONTAINER_TO_RESTART=gluetun,qBittorrent
       - TZ=Europe/Paris
     volumes:
-      # For application history persistence
-      - ./gluetun-switcher/config:/root/.config
+      # For application configuration & history persistence
+      - /{your_host_volume}/gluetun-switcher/config:/usr/src/app/config
       
       # --- IMPORTANT VOLUME ---
       # Mount the folder containing your .conf files here
-      - ./gluetun/wireguard:/etc/wireguard
+      - /{your_gluetun_volume}/wireguard:/etc/wireguard
       
       # --- MANDATORY VOLUME ---
       # Required to allow restarting other containers
       - /var/run/docker.sock:/var/run/docker.sock
 ```
+Select your own volume !
 
 **To launch:**
 ```bash
@@ -76,14 +78,15 @@ docker run -d \
   --restart=unless-stopped \
   -p 3003:3003 \
   -e WIREGUARD_DIR=/etc/wireguard \
+  -e NODE_ENV=production \
   -e CONTAINER_TO_RESTART="gluetun,qBittorrent" \
   -e TZ=Europe/Paris \
-  -v ./gluetun-switcher/config:/root/.config \
-  -v ./gluetun/wireguard:/etc/wireguard \
+  -v /{your_host_volume}/gluetun-switcher/config:/usr/src/app/config \
+  -v /{your_gluetun_volume}/wireguard:/etc/wireguard \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/fuzzzor/gluetun-switcher:latest
 ```
-
+Select your own volume !
 ---
 
 ## Configuration
