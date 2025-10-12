@@ -16,6 +16,7 @@ services:
       - WIREGUARD_DIR=/etc/wireguard
       # Nom(s) du ou des conteneur(s) à redémarrer, séparés par une virgule
       - CONTAINER_TO_RESTART=gluetun,qbittorrent
+      - NODE_ENV=production
     volumes:
       # Persistance des données de l'application
       - /volume1/docker/gluetun-switcher/config:/usr/src/app/config

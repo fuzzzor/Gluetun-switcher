@@ -20,3 +20,5 @@ README.md
 .vscode
 # Dossier de configuration WireGuard local
 wireguard-configs-local/
+# Fichier de configuration local
+locations.local.json
