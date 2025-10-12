@@ -174,6 +174,29 @@ function initializeEventListeners() {
             loadWireguardFiles();
         }
     });
+
+    // Initialize collapsible sections
+    document.querySelectorAll('[data-collapsible]').forEach(header => {
+        const contentId = header.getAttribute('data-collapsible');
+        const content = document.getElementById(contentId);
+        const toggleIcon = header.querySelector('.collapse-toggle i');
+
+        if (content) {
+            // Collapse history by default
+            if (contentId === 'historyContent') {
+                content.classList.add('collapsed');
+                toggleIcon.classList.add('rotated');
+            }
+
+            header.addEventListener('click', (e) => {
+                // Prevent clicks on buttons inside the header from triggering collapse
+                if (e.target.closest('button')) return;
+
+                content.classList.toggle('collapsed');
+                toggleIcon.classList.toggle('rotated');
+            });
+        }
+    });
 }
 
 // Chargement des fichiers WireGuard
