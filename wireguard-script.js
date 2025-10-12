@@ -234,7 +234,7 @@ function selectFile(fileName) {
     const fileItem = document.querySelector(`[data-file="${fileName}"]`);
     if (fileItem) {
         fileItem.classList.add('selected');
-        selectedFile = wireguardFiles.find(f => f.name === fileName);
+        selectedFile = wireguardFiles.find(f => f.fileName === fileName);
         activateBtn.disabled = false;
         showNotification(translations.configSelected.replace('{fileName}', fileName), 'info');
     }
@@ -440,22 +440,32 @@ function getLocationInfo(fileName) {
 
     const name = fileName.toLowerCase();
 
+    // 1. Build a flat list of keywords with their associated location data
     const allKeywords = [];
-    for (const [countryCode, data] of Object.entries(locationData)) {
-        // Le nom de la ville à afficher est le dernier élément de la liste de mots-clés.
-        const displayCity = data.keywords[data.keywords.length - 1];
-        for (const keyword of data.keywords) {
-            allKeywords.push({ keyword, countryCode, displayCity });
+    if (Array.isArray(locationData)) {
+        for (const location of locationData) {
+            if (location.keywords && location.countryCode) {
+                const displayCity = location.keywords[location.keywords.length - 1];
+                for (const keyword of location.keywords) {
+                    allKeywords.push({
+                        keyword,
+                        countryCode: location.countryCode,
+                        countryNameKey: location.countryNameKey,
+                        displayCity
+                    });
+                }
+            }
         }
     }
 
+    // 2. Sort by keyword length to match more specific keywords first (e.g., "us-newyork" before "us")
     allKeywords.sort((a, b) => b.keyword.length - a.keyword.length);
 
-    for (const { keyword, countryCode, displayCity } of allKeywords) {
-        const regex = new RegExp(`\\b${keyword}\\b`);
+    // 3. Find the first matching keyword in the file name
+    for (const { keyword, countryCode, countryNameKey, displayCity } of allKeywords) {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'i'); // Use case-insensitive regex
         if (regex.test(name)) {
-            const data = locationData[countryCode];
-            const countryName = translations[data.countryNameKey] || data.countryNameKey;
+            const countryName = translations[countryNameKey] || countryNameKey;
             return {
                 flag: `<img src="config/flags/${countryCode}.svg" class="country-flag" alt="${countryName}" title="${countryName}">`,
                 name: countryName,
@@ -464,10 +474,12 @@ function getLocationInfo(fileName) {
         }
     }
 
+    // 4. Fallback for generic names if no keyword matches
     if (name.includes('server')) return { flag: `<i class="fas fa-server country-flag" title="${translations.server || 'Server'}"></i>`, name: translations.genericServer || 'Generic Server', city: null };
     if (name.includes('test')) return { flag: `<i class="fas fa-flask country-flag" title="${translations.test || 'Test'}"></i>`, name: translations.testConfig || 'Test Config', city: null };
     if (name.includes('backup')) return { flag: `<i class="fas fa-save country-flag" title="${translations.backup || 'Backup'}"></i>`, name: translations.backupConfig || 'Backup Config', city: null };
 
+    // 5. Return default if no match at all
     return defaultLocation;
 }
 
