@@ -298,11 +298,11 @@ function resetSelection() {
 function showConfirmationModal() {
     if (!selectedFile) return;
     
-    const location = getLocationInfo(selectedFile.name);
+    const location = getLocationInfo(selectedFile.fileName);
     const locationString = location.city ? `${location.name}, ${location.city}` : location.name;
     confirmMessage.innerHTML = `
         <strong>${translations.activateConfigTitle}</strong><br><br>
-        <strong>${translations.fileSelected}</strong> ${location.flag} ${selectedFile.name} (${locationString})<br>
+        <strong>${translations.fileSelected}</strong> ${location.flag} ${selectedFile.fileName} (${locationString})<br>
         <strong>${translations.action}</strong> ${translations.activateThisConfig}<br><br>
         ${translations.thisActionWillActivate}
     `;
