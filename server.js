@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -50,12 +51,57 @@ app.get('/api/wireguard-files', async (req, res) => {
 // Charger les données de localisation
 app.get('/api/locations', async (req, res) => {
   try {
-    const data = await fs.readFile(path.join(__dirname, 'config', 'locations.json'), 'utf8');
-    res.json(JSON.parse(data));
+    // 1. Get wireguard directory and list of files
+    const wireguardDir = process.env.WIREGUARD_DIR;
+    let availableConfFiles = [];
+    if (wireguardDir) {
+      try {
+        const files = await fs.readdir(wireguardDir);
+        availableConfFiles = files.filter(file => file.endsWith('.conf'));
+      } catch {
+        // If directory doesn't exist, it's fine, no files are available.
+        console.log(`WireGuard directory ${wireguardDir} not found, assuming no configs are available.`);
+      }
+    }
+
+    // 2. Load locations data (respecting development environment)
+    const locationsFile = process.env.NODE_ENV === 'development'
+      ? path.join(__dirname, 'locations.local.json')
+      : path.join(__dirname, 'config', 'locations.json');
+    const locationsData = JSON.parse(await fs.readFile(locationsFile, 'utf8'));
+
+    // 3. Process and enrich locations
+    const enrichedLocations = Object.entries(locationsData).map(([countryCode, data]) => {
+      const hasEnoughKeywords = data.keywords && data.keywords.length >= 2;
+      let matchingFileName = null;
+      let isAvailable = false;
+
+      if (hasEnoughKeywords) {
+        // Filename is expected to be based on the first keyword. e.g., "france" -> "france.conf"
+        const expectedFileName = `${data.keywords[0]}.conf`;
+        const foundFile = availableConfFiles.find(f => f.toLowerCase() === expectedFileName.toLowerCase());
+        if (foundFile) {
+          matchingFileName = foundFile;
+          isAvailable = true;
+        }
+      }
+
+      return {
+        countryCode,
+        ...data,
+        isAvailable,
+        fullPath: isAvailable ? path.join(wireguardDir, matchingFileName) : null,
+        fileName: matchingFileName,
+      };
+    });
+
+    res.json({ success: true, locations: enrichedLocations });
+
   } catch (error) {
+    console.error('Error in /api/locations:', error);
     res.status(500).json({
       success: false,
-      error: `Impossible de charger le fichier locations.json: ${error.message}`
+      error: `Impossible de charger les données de localisation: ${error.message}`
     });
   }
 });

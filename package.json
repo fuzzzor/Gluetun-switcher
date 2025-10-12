@@ -9,9 +9,22 @@
   "author": "Utilisateur",
   "license": "MIT",
   "dependencies": {
-    "dockerode": "^4.0.2",
-    "express": "^4.18.2",
+    "conf": "^13.0.0",
     "cors": "^2.8.5",
-    "conf": "^13.0.0"
+    "dockerode": "^4.0.2",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fuzzzor/gluetun-switcher.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/fuzzzor/gluetun-switcher/issues"
+  },
+  "homepage": "https://github.com/fuzzzor/gluetun-switcher#readme",
+  "devDependencies": {
+    "cross-env": "^10.1.0"
   }
 }

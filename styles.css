@@ -639,6 +639,10 @@ body {
     background: var(--success-color);
     color: var(--white);
 }
+.status-unavailable {
+    background: var(--danger-color);
+    color: var(--white);
+}
 
 .status-current {
     background: var(--warning-color);

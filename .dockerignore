@@ -18,3 +18,5 @@ README.md
 
 # Fichiers de configuration de l'éditeur
 .vscode
+# Dossier de configuration WireGuard local
+wireguard-configs-local/

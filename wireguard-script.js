@@ -102,7 +102,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadLocations() {
     try {
-        locationData = await api.getLocations();
+        const result = await api.getLocations();
+        if (result.success) {
+            locationData = result.locations;
+        } else {
+            throw new Error(result.error);
+        }
     } catch (error) {
         console.error('Could not load locations:', error);
         showNotification('Erreur: Impossible de charger les données de localisation.', 'error');
@@ -156,15 +161,13 @@ async function loadWireguardFiles() {
             </div>
         `;
         
-        const result = await api.listWireguardFiles();
+        // We now primarily use the enriched locations endpoint
+        await loadLocations();
+        wireguardFiles = locationData; // The location data is now our source of truth
+        displayFileList();
         
-        if (result.success) {
-            wireguardFiles = result.files;
-            displayFileList();
-            showNotification(translations.configsFound.replace('{count}', result.files.length), 'success');
-        } else {
-            throw new Error(result.error);
-        }
+        const availableCount = locationData.filter(loc => loc.isAvailable).length;
+        showNotification(translations.configsFound.replace('{count}', availableCount), 'success');
         
     } catch (error) {
         showNotification(translations.errorLoading.replace('{error}', error.message), 'error');
@@ -193,22 +196,30 @@ function displayFileList() {
         return;
     }
     
-    fileList.innerHTML = wireguardFiles.map(file => {
-        const location = getLocationInfo(file.name);
-        const locationString = location.city ? `${location.name}, ${location.city}` : location.name;
+    fileList.innerHTML = wireguardFiles.map(location => {
+        const { countryCode, countryNameKey, keywords, isAvailable, fileName } = location;
+        const countryName = translations[countryNameKey] || countryNameKey;
+        const city = keywords.length > 1 ? keywords[keywords.length - 1] : '';
+        const locationString = city ? `${countryName}, ${city.charAt(0).toUpperCase() + city.slice(1)}` : countryName;
+        const flag = `<img src="config/flags/${countryCode}.svg" class="country-flag" alt="${countryName}" title="${countryName}">`;
+        const statusClass = isAvailable ? 'status-available' : 'status-unavailable';
+        const statusText = isAvailable ? translations.available : translations.unavailable;
+        const clickHandler = isAvailable ? `onclick="selectFile('${fileName}')"` : '';
+        const itemClass = isAvailable ? 'file-item' : 'file-item disabled';
+
         return `
-        <div class="file-item" data-file="${file.name}" onclick="selectFile('${file.name}')">
+        <div class="${itemClass}" data-file="${fileName || countryCode}" ${clickHandler}>
             <div class="file-info">
                 <div class="file-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
                 <div class="file-details">
-                    <h4>${location.flag} ${file.name}</h4>
+                    <h4>${flag} ${fileName || countryName}</h4>
                     <p>${locationString}</p>
                 </div>
             </div>
             <div class="file-status">
-                <span class="status-badge status-available">${translations.available}</span>
+                <span class="status-badge ${statusClass}">${statusText}</span>
             </div>
         </div>
     `}).join('');

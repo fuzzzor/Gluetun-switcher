@@ -27,6 +27,7 @@
   "noConfigAvailable": "Aucune configuration disponible",
   "onlyConfAllowed": "Seuls les fichiers .conf (sauf wg0.conf) sont affichés",
   "available": "Disponible",
+  "unavailable": "Indisponible",
   "configSelected": "Configuration \"{fileName}\" sélectionnée",
   "active": "Actif",
   "size": "Taille: {size}",

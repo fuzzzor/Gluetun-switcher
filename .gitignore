@@ -1,0 +1,10 @@
+# Ignore le dossier de configuration WireGuard local
+wireguard-configs-local/
+# Fichier d'environnement local
+.env
+# Fichiers et dossiers de configuration locaux
+locations.local.json
+config-local/
+# Dépendances
+node_modules/
+npm-debug.log*
