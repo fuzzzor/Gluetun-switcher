@@ -99,8 +99,8 @@ Select your own volume !
 
 ### Volumes
 
-- `./gluetun-switcher/config:/root/.config`: (Recommended) This volume ensures the persistence of the operation history.
-- `./gluetun/wireguard:/etc/wireguard`: (Required) This is the core of the application.
+- `/{your_host_volume}/gluetun-switcher/config:/usr/src/app/config`: (Recommended) This volume ensures the persistence of the operation history & configuration.
+- `/{your_gluetun_volume}/wireguard:/etc/wireguard`: (Required) This is the core of the application.
     - The left path (`./gluetun/wireguard`) is the folder on your **host** machine where you have stored your `.conf` files.
     - The right path (`/etc/wireguard`) is the folder **inside the container** where the application will look for the files. It must match the `WIREGUARD_DIR` variable.
 - `/var/run/docker.sock:/var/run/docker.sock`: (Required) This volume is crucial for the restart functionality.
