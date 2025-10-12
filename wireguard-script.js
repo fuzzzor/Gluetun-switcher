@@ -75,6 +75,7 @@ async function loadTranslations() {
         applyTranslations();
     } catch (error) {
         console.error('Could not load translations:', error);
+        throw error; // Re-throw to stop initialization
     }
 }
 
@@ -89,15 +90,40 @@ function applyTranslations() {
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', async () => {
-    await Promise.all([
-        loadTranslations(),
-        loadLocations()
-    ]);
-    initializeEventListeners();
-    operationHistory = await api.getOperationHistory(); // Charger l'historique
-    updateHistoryDisplay(); // Afficher l'historique chargé
-    loadWireguardFiles();
-    checkCurrentConfig();
+    try {
+        // Load critical data first. If this fails, the app can't start.
+        await Promise.all([
+            loadTranslations(),
+            loadLocations()
+        ]);
+
+        // Initialize the rest of the app
+        initializeEventListeners();
+        operationHistory = await api.getOperationHistory();
+        updateHistoryDisplay();
+        loadWireguardFiles();
+        checkCurrentConfig();
+
+    } catch (error) {
+        console.error('Application initialization failed:', error);
+        const mainContent = document.querySelector('.main-content');
+        const header = document.querySelector('.header');
+
+        if (header) {
+            header.innerHTML = `<h1><i class="fas fa-times-circle"></i> Application Error</h1>`;
+        }
+        if (mainContent) {
+            mainContent.innerHTML = `
+                <div class="card">
+                    <div class="card-body no-files" style="color: var(--danger-color);">
+                        <i class="fas fa-exclamation-triangle fa-3x" style="margin-bottom: 15px;"></i>
+                        <h2>Failed to Start</h2>
+                        <p>The application could not load critical data. Please check the browser's console for more details and try refreshing the page.</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
 });
 
 async function loadLocations() {
@@ -110,7 +136,8 @@ async function loadLocations() {
         }
     } catch (error) {
         console.error('Could not load locations:', error);
-        showNotification('Erreur: Impossible de charger les données de localisation.', 'error');
+        // Re-throw to be caught by the main initializer
+        throw new Error(`Failed to load location data: ${error.message}`);
     }
 }
  
