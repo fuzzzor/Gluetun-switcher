@@ -1,4 +1,4 @@
-// API wrapper pour communiquer avec le backend
+// API wrapper to communicate with the backend
 const api = {
     async _request(method, endpoint, body = null) {
         try {
@@ -15,12 +15,12 @@ const api = {
                 const err = await response.json();
                 throw new Error(err.error || `Erreur ${response.status}`);
             }
-            // Gérer les réponses qui n'ont pas de corps JSON
+            // Handle responses that do not have a JSON body
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 return response.json();
             }
-            return { success: true }; // Pour les requêtes comme DELETE qui ne renvoient rien
+            return { success: true }; // For requests like DELETE that return nothing
         } catch (error) {
             console.error(`API Error on ${method} /api/${endpoint}:`, error);
             throw error;
@@ -30,7 +30,7 @@ const api = {
     post(endpoint, body) { return this._request('POST', endpoint, body); },
     delete(endpoint) { return this._request('DELETE', endpoint); },
 
-    // Fonctions spécifiques à l'application
+    // Application-specific functions
     getOperationHistory: () => api.get('operation-history'),
     saveOperationHistory: (history) => api.post('operation-history', { history }),
     clearOperationHistory: () => api.delete('operation-history'),
@@ -41,14 +41,14 @@ const api = {
 };
 
 
-// Variables globales
+// Global variables
 let selectedFile = null;
 let wireguardFiles = [];
 let operationHistory = [];
 let translations = {};
 let locationData = {};
 
-// Elements DOM
+// DOM Elements
 const refreshBtn = document.getElementById('refreshBtn');
 const fileList = document.getElementById('fileList');
 const activateBtn = document.getElementById('activateBtn');
@@ -57,7 +57,7 @@ const currentConfig = document.getElementById('currentConfig');
 
 const operationHistoryContainer = document.getElementById('operationHistory');
 const notificationsContainer = document.getElementById('notifications');
-const clearHistoryBtn = document.getElementById('clearHistoryBtn'); // Nouveau bouton
+const clearHistoryBtn = document.getElementById('clearHistoryBtn'); // New button
 
 const confirmModal = document.getElementById('confirmModal');
 const confirmMessage = document.getElementById('confirmMessage');
@@ -65,7 +65,7 @@ const confirmYes = document.getElementById('confirmYes');
 const confirmNo = document.getElementById('confirmNo');
 const modalClose = document.querySelector('.modal-close');
  
-// Initialisation
+// Initialization
 async function loadTranslations() {
     const lang = navigator.language.startsWith('fr') ? 'fr' : 'en';
     document.documentElement.lang = lang;
@@ -88,7 +88,7 @@ function applyTranslations() {
     });
 }
 
-// Initialisation
+// Initialization
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         // Load critical data first. If this fails, the app can't start.
@@ -141,13 +141,13 @@ async function loadLocations() {
     }
 }
  
-// Gestionnaires d'événements
+// Event Handlers
 function initializeEventListeners() {
     refreshBtn.addEventListener('click', loadWireguardFiles);
     activateBtn.addEventListener('click', showConfirmationModal);
     resetBtn.addEventListener('click', resetSelection);
 
-    // Gestionnaire pour le bouton d'effacement de l'historique
+    // Handler for the history clear button
     if (clearHistoryBtn) {
         clearHistoryBtn.addEventListener('click', clearOperationHistory);
     }
@@ -157,14 +157,14 @@ function initializeEventListeners() {
     confirmNo.addEventListener('click', hideConfirmationModal);
     modalClose.addEventListener('click', hideConfirmationModal);
     
-    // Fermer le modal en cliquant à l'extérieur
+    // Close the modal by clicking outside
     confirmModal.addEventListener('click', (e) => {
         if (e.target === confirmModal) {
             hideConfirmationModal();
         }
     });
     
-    // Raccourcis clavier
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             hideConfirmationModal();
@@ -199,7 +199,7 @@ function initializeEventListeners() {
     });
 }
 
-// Chargement des fichiers WireGuard
+// Loading WireGuard files
 async function loadWireguardFiles() {
     try {
         refreshBtn.disabled = true;
@@ -233,7 +233,7 @@ async function loadWireguardFiles() {
     }
 }
 
-// Affichage de la liste des fichiers
+// Displaying the file list
 function displayFileList() {
     if (wireguardFiles.length === 0) {
         fileList.innerHTML = `
@@ -275,7 +275,7 @@ function displayFileList() {
     `}).join('');
 }
 
-// Sélection d'un fichier
+// Selecting a file
 function selectFile(fileName) {
     document.querySelectorAll('.file-item').forEach(item => {
         item.classList.remove('selected');
@@ -290,7 +290,7 @@ function selectFile(fileName) {
     }
 }
 
-// Vérification de la configuration actuelle
+// Checking the current configuration
 async function checkCurrentConfig() {
     try {
         const configInfo = await api.getCurrentConfigInfo();
@@ -316,7 +316,7 @@ async function checkCurrentConfig() {
             `;
             currentConfig.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
         } else {
-            // Gère les erreurs de lecture ou autres erreurs serveur
+            // Handle read errors or other server errors
             throw new Error(configInfo.error || translations.unknownErrorChecking);
         }
     } catch (error) {
@@ -332,7 +332,7 @@ async function checkCurrentConfig() {
     }
 }
 
-// Réinitialisation de la sélection
+// Resetting the selection
 function resetSelection() {
     selectedFile = null;
     activateBtn.disabled = true;
@@ -344,7 +344,7 @@ function resetSelection() {
     showNotification(translations.selectionReset, 'info');
 }
 
-// Affichage du modal de confirmation
+// Displaying the confirmation modal
 function showConfirmationModal() {
     if (!selectedFile) return;
     
@@ -360,12 +360,12 @@ function showConfirmationModal() {
     confirmModal.classList.remove('hidden');
 }
 
-// Masquage du modal de confirmation
+// Hiding the confirmation modal
 function hideConfirmationModal() {
     confirmModal.classList.add('hidden');
 }
 
-// Exécution de l'activation
+// Executing the activation
 async function executeActivation() {
     hideConfirmationModal();
     if (!selectedFile) return;
@@ -411,7 +411,7 @@ async function executeActivation() {
     }
 }
 
-// Ajout à l'historique des opérations
+// Adding to the operation history
 async function addToHistory(operation) {
     operationHistory.unshift(operation);
     
@@ -423,7 +423,7 @@ async function addToHistory(operation) {
     await api.saveOperationHistory(operationHistory);
 }
 
-// Mise à jour de l'affichage de l'historique
+// Updating the history display
 function updateHistoryDisplay() {
     const noOperationsMsg = operationHistoryContainer.querySelector('.no-operations');
     
@@ -446,7 +446,7 @@ function updateHistoryDisplay() {
     `).join('');
 }
 
-// Affichage des notifications
+// Displaying notifications
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
@@ -473,7 +473,7 @@ function showNotification(message, type = 'info') {
     });
 }
 
-// Fonctions utilitaires
+// Utility functions
 
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
@@ -561,7 +561,7 @@ async function clearOperationHistory() {
     }
 }
  
-// Gestion des erreurs globales
+// Global error handling
 window.addEventListener('error', (e) => {
     console.error('Erreur JavaScript:', e.error);
     showNotification(translations.unexpectedError, 'error');

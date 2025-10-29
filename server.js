@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs').promises;
 const Docker = require('dockerode');
-// electron-store sera importé dynamiquement pour la compatibilité ESM
+// electron-store will be imported dynamically for ESM compatibility
 
 const app = express();
 const port = 3003;
@@ -16,12 +16,12 @@ async function startServer() {
 
 // Middlewares
 app.use(cors());
-app.use(express.json()); // Pour parser le JSON dans les requêtes POST
+app.use(express.json()); // To parse JSON in POST requests
 
 // --- API Routes ---
-// Déclarées avant les fichiers statiques pour qu'elles aient la priorité.
+// Declared before static files to give them priority.
 
-// Lister les fichiers WireGuard
+// List WireGuard files
 app.get('/api/wireguard-files', async (req, res) => {
   const wireguardDir = process.env.WIREGUARD_DIR;
   if (!wireguardDir) {
@@ -48,7 +48,7 @@ app.get('/api/wireguard-files', async (req, res) => {
   }
 });
 
-// Charger les données de localisation
+// Load location data
 app.get('/api/locations', async (req, res) => {
   try {
     // 1. Get wireguard directory and list of files
@@ -106,7 +106,7 @@ app.get('/api/locations', async (req, res) => {
   }
 });
 
-// Activer une configuration WireGuard (renommer en wg0.conf)
+// Activate a WireGuard configuration (rename to wg0.conf)
 app.post('/api/activate-config', async (req, res) => {
   const { sourcePath } = req.body;
   console.log(`[ACTIVATE] Received request to activate: ${sourcePath}`);
@@ -134,7 +134,7 @@ app.post('/api/activate-config', async (req, res) => {
     console.log(`[ACTIVATE] Attempting to copy '${sourcePath}' to '${wg0Path}'`);
     await fs.copyFile(sourcePath, wg0Path);
     console.log(`[ACTIVATE] Copy successful.`);
-    await fs.writeFile(statePath, JSON.stringify({ activeConfigName: sourceName }));
+    await fs.writeFile(statePath, JSON.stringify({ activeConfigName: sourceName })); // Save the name of the activated file
 
     const restartResults = [];
     const containersToRestart = process.env.CONTAINER_TO_RESTART;
@@ -179,11 +179,11 @@ app.post('/api/activate-config', async (req, res) => {
   }
 });
 
-// La fonctionnalité SSH a été supprimée.
+// SSH functionality has been removed.
 
-// Les routes pour les chemins de configuration et l'état de repliement ont été supprimées.
+// Routes for configuration paths and folding state have been removed.
 
-// Obtenir les informations sur la configuration active (wg0.conf)
+// Get information about the active configuration (wg0.conf)
 app.get('/api/current-config-info', async (req, res) => {
   const wireguardDir = process.env.WIREGUARD_DIR;
   if (!wireguardDir) {
@@ -199,8 +199,8 @@ app.get('/api/current-config-info', async (req, res) => {
     const stateData = await fs.readFile(statePath, 'utf8');
     activeConfigName = JSON.parse(stateData).activeConfigName || 'wg0.conf';
   } catch (error) {
-    // Le fichier d'état n'existe pas encore, ce n'est pas une erreur bloquante.
-    console.log("Fichier d'état non trouvé, utilisation du nom par défaut.");
+    // The state file does not exist yet, this is not a blocking error.
+    console.log("State file not found, using default name.");
   }
 
   try {
@@ -213,7 +213,7 @@ app.get('/api/current-config-info', async (req, res) => {
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
-      // Le fichier wg0.conf n'existe pas, ce qui est une information valide
+      // The wg0.conf file does not exist, which is valid information
       res.json({ success: false, reason: 'not_found' });
     } else {
       res.status(500).json({
@@ -225,7 +225,7 @@ app.get('/api/current-config-info', async (req, res) => {
   }
 });
 
-// Gestion de l'historique des opérations
+// Manage operation history
 app.route('/api/operation-history')
   .get(async (req, res) => {
     try {
@@ -233,9 +233,9 @@ app.route('/api/operation-history')
       res.json(JSON.parse(data));
     } catch (error) {
       if (error.code === 'ENOENT') {
-        res.json([]); // Le fichier n'existe pas, renvoyer un tableau vide
+        res.json([]); // The file does not exist, return an empty array
       } else {
-        res.status(500).json({ success: false, error: 'Impossible de lire l\'historique.' });
+        res.status(500).json({ success: false, error: 'Could not read history.' });
       }
     }
   })
@@ -244,7 +244,7 @@ app.route('/api/operation-history')
       await fs.writeFile(historyPath, JSON.stringify(req.body.history, null, 2));
       res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Impossible d\'écrire l\'historique.' });
+      res.status(500).json({ success: false, error: 'Could not write history.' });
     }
   })
   .delete(async (req, res) => {
@@ -252,26 +252,26 @@ app.route('/api/operation-history')
       await fs.unlink(historyPath);
       res.json({ success: true });
     } catch (error) {
-      if (error.code !== 'ENOENT') { // Ignorer si le fichier n'existe pas
-        res.status(500).json({ success: false, error: 'Impossible de supprimer l\'historique.' });
+      if (error.code !== 'ENOENT') { // Ignore if the file does not exist
+        res.status(500).json({ success: false, error: 'Could not delete history.' });
       } else {
         res.json({ success: true });
       }
     }
   });
 
-// Route pour servir la page d'accueil explicite
+// Route to serve the explicit home page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'gluetun-switcher.html'));
 });
 
-// Le middleware express.static sert les autres fichiers (CSS, JS, images).
-// Il doit être déclaré APRES les routes de l'API.
+// The express.static middleware serves other files (CSS, JS, images).
+// It must be declared AFTER the API routes.
 app.use(express.static(__dirname));
 
-// Démarrage du serveur
+// Start the server
 app.listen(port, () => {
-  console.log(`Serveur web démarré sur http://localhost:${port}`);
+  console.log(`Web server started on http://localhost:${port}`);
 });
 }
 

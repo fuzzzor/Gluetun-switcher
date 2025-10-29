@@ -1,31 +1,31 @@
 #!/bin/sh
 
-# Définir les chemins
+# Define paths
 CONFIG_DIR="/usr/src/app/config"
 HISTORY_DIR="$CONFIG_DIR/history"
 DEFAULTS_DIR="/app-defaults"
 
-# S'assurer que le répertoire de configuration principal existe
+# Ensure the main configuration directory exists
 mkdir -p "$CONFIG_DIR"
 
-# Vérifier si le fichier de configuration principal existe
+# Check if the main configuration file exists
 if [ ! -f "$CONFIG_DIR/locations.json" ]; then
-  echo "Le fichier locations.json n'existe pas dans le volume monté."
-  echo "Copie de la configuration par défaut..."
+  echo "locations.json file does not exist in the mounted volume."
+  echo "Copying default configuration..."
   
-  # Copier le fichier de configuration et le répertoire des drapeaux
+  # Copy the configuration file and the flags directory
   cp "$DEFAULTS_DIR/locations.json" "$CONFIG_DIR/locations.json"
   cp -r "$DEFAULTS_DIR/flags" "$CONFIG_DIR/"
   
-  echo "Configuration par défaut copiée."
+  echo "Default configuration copied."
 else
-  echo "Configuration existante trouvée."
+  echo "Existing configuration found."
 fi
 
-# S'assurer que le sous-répertoire pour l'historique existe
+# Ensure the subdirectory for history exists
 mkdir -p "$HISTORY_DIR"
-echo "Le répertoire de l'historique est prêt."
+echo "History directory is ready."
 
-echo "Démarrage de l'application..."
-# Exécuter la commande principale de l'application (démarrer le serveur Node.js)
+echo "Starting the application..."
+# Execute the main application command (start the Node.js server)
 exec "$@"

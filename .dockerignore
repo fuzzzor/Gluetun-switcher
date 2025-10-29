@@ -1,24 +1,24 @@
-# Fichiers et dossiers à ignorer lors du build de l'image Docker
+# Files and folders to ignore during the Docker image build
 
-# Dépendances locales
+# Local dependencies
 node_modules
 
-# Fichiers de log
+# Log files
 npm-debug.log
 *.log
 
-# Fichiers de configuration Docker et de documentation
+# Docker configuration and documentation files
 Dockerfile
 docker-compose.yml
 README.md
 
-# Dossiers et fichiers de contrôle de version
+# Version control files and folders
 .git
 .gitignore
 
-# Fichiers de configuration de l'éditeur
+# Editor configuration files
 .vscode
-# Dossier de configuration WireGuard local
+# Local WireGuard configuration folder
 wireguard-configs-local/
-# Fichier de configuration local
+# Local configuration file
 locations.local.json

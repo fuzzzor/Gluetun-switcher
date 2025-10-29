@@ -1,4 +1,4 @@
-/* Reset et variables CSS */
+/* CSS Reset and Variables */
 * {
     margin: 0;
     padding: 0;
@@ -131,7 +131,7 @@ body {
 }
 
 .collapsible-content {
-    max-height: 1000px; /* Valeur suffisamment grande pour contenir le contenu */
+    max-height: 1000px; /* Large enough value to contain the content */
     overflow: hidden;
     transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
 }
@@ -522,7 +522,7 @@ body {
     }
 }
 
-/* Styles pour les listes de fichiers WireGuard */
+/* Styles for WireGuard file lists */
 .file-list {
     max-height: 400px;
     overflow-y: auto;
