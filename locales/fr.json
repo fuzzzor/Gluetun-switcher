@@ -104,5 +104,8 @@
   "newzealand": "Nouvelle-Zélande",
   "thailand": "Thaïlande",
   "serbia": "Serbie",
-  "greece": "Grèce"
+  "greece": "Grèce",
+  "activationSuccessLocation": "Le pays \"{location}\" a été activé avec succès.",
+  "restartedContainer": " Le conteneur \"{containerName}\" a été redémarré.",
+  "restartedContainerError": " ERREUR lors du redémarrage du conteneur \"{containerName}\": {error}"
 }

@@ -104,5 +104,8 @@
   "newzealand": "New Zealand",
   "thailand": "Thailand",
   "serbia": "Serbia",
-  "greece": "Greece"
+  "greece": "Greece",
+  "activationSuccessLocation": "The location \"{location}\" was activated successfully.",
+  "restartedContainer": " The container \"{containerName}\" was restarted.",
+  "restartedContainerError": " ERROR restarting container \"{containerName}\": {error}"
 }

@@ -376,10 +376,23 @@ async function executeActivation() {
         const result = await api.activateConfig(selectedFile.fullPath);
         
         if (result.success) {
-            showNotification(result.message, 'success');
+            const locationInfo = getLocationInfo(result.activated.sourceName);
+            const locationString = locationInfo.city ? `${locationInfo.name}, ${locationInfo.city}` : locationInfo.name;
+            
+            let message = translations.activationSuccessLocation.replace('{location}', locationString);
+            
+            result.restarts.forEach(r => {
+                if (r.status === 'success') {
+                    message += translations.restartedContainer.replace('{containerName}', r.containerName);
+                } else {
+                    message += translations.restartedContainerError.replace('{containerName}', r.containerName).replace('{error}', r.message);
+                }
+            });
+
+            showNotification(message, 'success');
             addToHistory({
                 type: 'success',
-                message: result.message,
+                message: message,
                 timestamp: new Date()
             });
             

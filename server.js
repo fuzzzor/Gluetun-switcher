@@ -121,7 +121,6 @@ app.post('/api/activate-config', async (req, res) => {
       throw new Error('Le chemin source n\'est pas un fichier valide');
     }
 
-    // Utilise la variable d'environnement pour trouver le répertoire WireGuard.
     const wireguardDir = process.env.WIREGUARD_DIR;
     if (!wireguardDir) {
       return res.status(500).json({
@@ -135,34 +134,41 @@ app.post('/api/activate-config', async (req, res) => {
     console.log(`[ACTIVATE] Attempting to copy '${sourcePath}' to '${wg0Path}'`);
     await fs.copyFile(sourcePath, wg0Path);
     console.log(`[ACTIVATE] Copy successful.`);
-    // Sauvegarder le nom du fichier activé
     await fs.writeFile(statePath, JSON.stringify({ activeConfigName: sourceName }));
 
-    let message = `"${sourceName}" a été copié et activé en "wg0.conf" avec succès.`;
-
-    // Redémarrer le conteneur si la variable d'environnement est définie
-    // Redémarrer le ou les conteneurs si la variable d'environnement est définie
+    const restartResults = [];
     const containersToRestart = process.env.CONTAINER_TO_RESTART;
     if (containersToRestart) {
       const containerNames = containersToRestart.split(',').map(name => name.trim());
       const restartPromises = containerNames.map(async (containerName) => {
-        if (!containerName) return; // Ignorer les noms vides
+        if (!containerName) return null;
         try {
           const container = docker.getContainer(containerName);
           await container.restart();
-          return ` Le conteneur "${containerName}" a été redémarré.`;
+          return { containerName, status: 'success' };
         } catch (restartError) {
-          return ` ERREUR: Impossible de redémarrer le conteneur "${containerName}": ${restartError.message}`;
+          let errorMessage = 'Unknown restart error';
+          if (restartError && restartError.json && restartError.json.message) {
+            errorMessage = restartError.json.message;
+          } else if (restartError && restartError.message) {
+            errorMessage = restartError.message;
+          } else if (restartError) {
+            errorMessage = String(restartError);
+          }
+          return { containerName, status: 'error', message: errorMessage };
         }
       });
-
-      const restartResults = await Promise.all(restartPromises);
-      message += restartResults.join('');
+      
+      const results = await Promise.all(restartPromises);
+      restartResults.push(...results.filter(r => r !== null));
     }
 
     res.json({
       success: true,
-      message: message
+      activated: {
+        sourceName: sourceName,
+      },
+      restarts: restartResults
     });
   } catch (error) {
     console.error(`[ACTIVATE] Error during activation:`, error);
