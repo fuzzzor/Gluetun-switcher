@@ -55,6 +55,9 @@
   "errorClearingHistory": "Error clearing history.",
   "unexpectedError": "An unexpected error occurred",
   "rejectedPromise": "An unexpected error occurred: {reason}",
+  "activationSuccessLocation": "The location \"{location}\" was activated successfully.",
+  "restartedContainer": " The container \"{containerName}\" was restarted.",
+  "restartedContainerError": " ERROR restarting container \"{containerName}\": {error}",
   "switzerland": "Switzerland",
   "france": "France",
   "uk": "United Kingdom",
@@ -104,8 +107,5 @@
   "newzealand": "New Zealand",
   "thailand": "Thailand",
   "serbia": "Serbia",
-  "greece": "Greece",
-  "activationSuccessLocation": "The location \"{location}\" was activated successfully.",
-  "restartedContainer": " The container \"{containerName}\" was restarted.",
-  "restartedContainerError": " ERROR restarting container \"{containerName}\": {error}"
+  "greece": "Greece"
 }

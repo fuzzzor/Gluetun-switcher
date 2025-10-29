@@ -55,6 +55,9 @@
   "errorClearingHistory": "Erreur lors de l'effacement de l'historique.",
   "unexpectedError": "Une erreur inattendue s'est produite",
   "rejectedPromise": "Une erreur inattendue s'est produite: {reason}",
+  "activationSuccessLocation": "Le pays \"{location}\" a été activé avec succès.",
+  "restartedContainer": " Le conteneur \"{containerName}\" a été redémarré.",
+  "restartedContainerError": " ERREUR lors du redémarrage du conteneur \"{containerName}\": {error}",
   "switzerland": "Suisse",
   "france": "France",
   "uk": "Royaume-Uni",
@@ -104,8 +107,5 @@
   "newzealand": "Nouvelle-Zélande",
   "thailand": "Thaïlande",
   "serbia": "Serbie",
-  "greece": "Grèce",
-  "activationSuccessLocation": "Le pays \"{location}\" a été activé avec succès.",
-  "restartedContainer": " Le conteneur \"{containerName}\" a été redémarré.",
-  "restartedContainerError": " ERREUR lors du redémarrage du conteneur \"{containerName}\": {error}"
+  "greece": "Grèce"
 }
